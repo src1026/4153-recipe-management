@@ -3,7 +3,7 @@ from app.models.recipe import Recipe
 from app.resources.recipe_resource import RecipeResource
 from app.services.service_factory import ServiceFactory
 
-router = APIRouter
+router = APIRouter()
 
 @router.get("/recipes/{recipe_id}", tags=["recipes"])
 async def get_recipe(recipe_id: int) -> Recipe:
