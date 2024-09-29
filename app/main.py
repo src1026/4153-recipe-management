@@ -2,7 +2,7 @@ from fastapi import Depends, FastAPI
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import courses
+from app.routers import recipes
 
 app = FastAPI()
 
