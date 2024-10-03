@@ -17,8 +17,10 @@ class ServiceFactory(BaseServiceFactory):
         if service_name == 'RecipeResource':
             result = recipe_resource.RecipeResource(config=None)
         elif service_name == 'RecipeResourceDataService':
-            context = dict(user="jigglypuff", password="Jigglypuff7!",
-                           host="jigglypuff.cl8u62goqlob.us-east-2.rds.amazonaws.com", port=3306)
+            # context = dict(user="jigglypuff", password="Jigglypuff7!",
+            #                host="jigglypuff.cl8u62goqlob.us-east-2.rds.amazonaws.com", port=3306)
+            context = dict(user="root", password="dbuserdbuser",
+                           host="localhost", port=3306)
             data_service = MySQLRDBDataService(context=context)
             result = data_service
         else:
