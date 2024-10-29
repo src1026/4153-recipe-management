@@ -12,8 +12,8 @@ class RecipeResource(BaseResource):
         #
         self.data_service = ServiceFactory.get_service("RecipeResourceDataService")
         self.database = "recipe_management"
-        self.collection = "recipe_sections"
-        self.key_field = "recipe_name"
+        self.collection = "Recipe"
+        self.key_field = "recipe_id"
 
     def get_by_key(self, key: str) -> RecipeSection:
         d_service = self.data_service # get recipe data from db
@@ -22,6 +22,7 @@ class RecipeResource(BaseResource):
             self.database, self.collection, key_field=self.key_field, key_value=key
         )
 
+        result['create_time'] = str(result['create_time'])
         result = RecipeSection(**result) # store result as Recipe model
         return result
 
