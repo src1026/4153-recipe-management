@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from app.models.recipe import RecipeSection
 from app.models.ingredient import Ingredient
 from app.models.instruction import Instruction
 from app.resources.recipe_resource import RecipeResource
