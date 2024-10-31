@@ -5,7 +5,7 @@ from pydantic import BaseModel, HttpUrl
 class RecipeSection(BaseModel):
     recipe_id: Optional[int] = None
     recipe_name: Optional[str] = None
-    owner_id: Optional[int] = None  # FK to a User
+    user_id: Optional[int] = None  # FK to a User
     content: Optional[str] = None
     rating: Optional[float] = None
     cuisine_id: Optional[int] = None  # FK to Cuisine
@@ -23,7 +23,7 @@ class RecipeSection(BaseModel):
             "example": {
                 "recipe_id": 123,
                 "recipe_name": "Pasta",
-                "owner_id": 1,
+                "user_id": 1,
                 "content": "Boil pasta, cook sauce, mix ingredients together.",
                 "rating": 4.5,
                 "cuisine_id": 2,

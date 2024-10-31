@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from app.models.recipe import RecipeSection
 from app.resources.recipe_resource import RecipeResource
 from app.services.service_factory import ServiceFactory
@@ -30,11 +30,30 @@ async def get_recipe(
         raise HTTPException(status_code=404, detail="No recipes found!")
     return results
 
-# @router.put("/recipe_section/{recipe_id}", tags=["recipes"])
-# async def update_recipe(recipe_id: int, recipe_data: Recipe) -> Recipe:
-#     res = ServiceFactory.get_service("RecipeResource")
-#     result = res.update_recipe(recipe_id, recipe_data.dict())
-#     return result
+@router.post("/recipes_sections", tags=["recipes"], response_model=RecipeSection, status_code=status.HTTP_201_CREATED)
+async def create_recipe(
+        recipe_data: RecipeSection,
+        recipe_resource: RecipeResource = Depends(get_recipe_resource)
+):
+    new_recipe = recipe_resource.create_recipe(recipe_data.dict())
+    if not new_recipe:
+        raise HTTPException(status_code=400, detail="Recipe creation failed")
+    return new_recipe, {"Location": f"/recipes_sections/{new_recipe.recipe_id}"}
+
+@router.put("/recipes_sections/{recipe_id}", tags=["recipes"], status_code=status.HTTP_202_ACCEPTED)
+async def update_recipe(
+    recipe_id: str,
+    recipe_data: RecipeSection,
+    recipe_resource: RecipeResource = Depends(get_recipe_resource)
+):
+
+    task_id = f"update-{recipe_id}"
+    status_url = f"/tasks/{task_id}/status"
+
+    return {
+        "message": "Update accepted",
+        "task_status_url": status_url
+    }
 
 # @router.delete("/recipe_section/{recipe_id}", tags=["recipes"])
 # async def delete_recipe(recipe_id: int):

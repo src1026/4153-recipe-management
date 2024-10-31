@@ -61,6 +61,41 @@ class MySQLRDBDataService(DataDataService):
 
         return result
 
+    def create_data_object(self, database_name: str, collection_name: str, data: dict):
+        connection = self._get_connection()
+        try:
+            if not connection:
+                print("No connection")
+                raise Exception("Failed to establish a database connection.")
+
+            print("Testing connection and cursor creation...")
+            cursor = connection.cursor()
+            print("Cursor created successfully.")
+
+            columns = ', '.join(data.keys())
+            placeholders = ', '.join(['%s'] * len(data))
+            sql_statement = f"INSERT INTO `{database_name}`.`{collection_name}` ({columns}) VALUES ({placeholders})"
+
+            print("SQL Statement:", sql_statement)
+            print("Data Values:", list(data.values()))
+
+            with connection.cursor() as cursor:
+                cursor.execute(sql_statement, list(data.values()))
+                connection.commit()
+                new_id = cursor.lastrowid
+                data['recipe_id'] = new_id
+                print("Inserted data:", data)
+                return data
+        except pymysql.MySQLError as e:
+            print(f"MySQL Error: {e}")
+            return None
+        except Exception as e:
+            print(f"General Error inserting data: {e}")
+            return None
+        finally:
+            if connection:
+                connection.close()
+                print("Database connection closed.")
 
     def get_paginated_data(self, database_name: str, table_name: str, offset: int = 0, limit: int = 10):
         connection = self._get_connection()
