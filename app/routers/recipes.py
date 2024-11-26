@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, status
-from app.models.recipe import RecipeSection
+from app.models.recipe import RecipeSection, PaginatedRecipeResponse
 from app.resources.recipe_resource import RecipeResource
 from app.services.service_factory import ServiceFactory
 from typing import List, Optional
@@ -30,38 +30,37 @@ async def get_recipes(recipe_id: str):
     # TODO: Add error handling (currently getting errors for NoneTypes )
     # TODO: Do lifecycle management for singleton resource
 
-@router.get("/recipes_sections", tags=["recipes"], response_model=List[RecipeSection])
+@router.get("/recipes_sections", tags=["recipes"], response_model=PaginatedRecipeResponse)
 async def get_recipe(
-        skip: int = Query(0, alias="offset"),
-        limit: int = Query(10),
-        filter_by: Optional[str] = None,
-        recipe_resource: RecipeResource = Depends(get_recipe_resource)
+    skip: int = Query(0, alias="offset"),
+    limit: int = Query(10),
+    filter_by: Optional[str] = None,
+    recipe_resource: RecipeResource = Depends(get_recipe_resource)
 ):
-    results = recipe_resource.get_paginated(skip=skip, limit=limit, filter_by=filter_by)
+    results, total_count = recipe_resource.get_paginated(skip=skip, limit=limit, filter_by=filter_by)
     if not results:
         raise HTTPException(status_code=404, detail="No recipes found!")
 
-    # add hateoas links to each recipe
-    recipes_with_links = [
-        {
-            **recipe.model_dump(),
-            "links": [
-                {"rel": "self", "href": f"/recipes_sections/{recipe.recipe_id}", "method": "GET"},
-                {"rel": "update", "href": f"/recipes_sections/{recipe.recipe_id}", "method": "PUT"},
-                {"rel": "delete", "href": f"/recipes_sections/{recipe.recipe_id}", "method": "DELETE"},
-            ],
-        }
-        for recipe in results
-    ]
+    # Add HATEOAS links to each recipe
+    recipes_with_links = []
+    for recipe in results:
+        recipe_dict = recipe.model_dump()
+        recipe_dict["links"] = [
+            {"rel": "self", "href": f"/recipes_sections/{recipe.recipe_id}", "method": "GET"},
+            {"rel": "update", "href": f"/recipes_sections/{recipe.recipe_id}", "method": "PUT"},
+            {"rel": "delete", "href": f"/recipes_sections/{recipe.recipe_id}", "method": "DELETE"},
+        ]
+        recipes_with_links.append(RecipeSection(**recipe_dict))
 
     return {
         "data": recipes_with_links,
         "pagination": {
             "offset": skip,
             "limit": limit,
-            "total_count": recipe_resource.get_total_count(filter_by=filter_by),
+            "total_count": total_count
         },
     }
+
 
 @router.post("/recipes_sections", tags=["recipes"], response_model=RecipeSection, status_code=status.HTTP_201_CREATED)
 async def create_recipe(

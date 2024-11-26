@@ -7,6 +7,14 @@ class Link(BaseModel):
     href: str
     method: str
 
+class Pagination(BaseModel):
+    offset: int
+    limit: int
+    total_count: int
+
+class PaginatedRecipeResponse(BaseModel):
+    data: List[RecipeSection]
+    pagination: Pagination
 class RecipeSection(BaseModel):
     recipe_id: Optional[int] = None
     recipe_name: Optional[str] = None
