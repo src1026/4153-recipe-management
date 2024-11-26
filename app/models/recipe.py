@@ -2,6 +2,11 @@ from __future__ import annotations
 from typing import Optional, List
 from pydantic import BaseModel, HttpUrl
 
+class Link(BaseModel):
+    rel: str
+    href: str
+    method: str
+
 class RecipeSection(BaseModel):
     recipe_id: Optional[int] = None
     recipe_name: Optional[str] = None
@@ -17,6 +22,7 @@ class RecipeSection(BaseModel):
     create_time: Optional[str] = None
     # pictures: Optional[List[HttpUrl]] = None  # List of URLs to pictures
     pictures: Optional[str]
+    links: Optional[List[Link]] = None
 
     class Config:
         json_schema_extra = {
@@ -31,6 +37,12 @@ class RecipeSection(BaseModel):
                 "comment": "101, 102",
                 "cooking_time": 30,
                 "create_time": "2024-09-27T09:54:51Z",
-                "pictures": "img1" 
+                "pictures": "img1",
+                "links": [
+                    {"rel": "self", "href": "/recipes_sections/123", "method": "GET"},
+                    {"rel": "update", "href": "/recipes_sections/123", "method": "PUT"},
+                    {"rel": "delete", "href": "/recipes_sections/123", "method": "DELETE"},
+                    {"rel": "comments", "href": "/recipes_sections/123/comments", "method": "GET"}
+                ]
             }
         }
