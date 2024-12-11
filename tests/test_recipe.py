@@ -31,7 +31,18 @@ def test_create_recipe():
 def test_update_recipe():
     # Test updating a recipe
     recipe_id = "123"
-    updated_data = {"recipe_name": "Updated Pasta"}
+    updated_data = {
+        "recipe_name": "Updated Pasta",
+        "user_id": 1,
+        "content": "Updated content",
+        "rating": 4.8,
+        "cuisine_id": 2,
+        "ingredient_id": "1,2,3",
+        "comment": "Updated comments",
+        "cooking_time": 35,
+        "create_time": "2024-09-30T12:00:00Z",
+        "pictures": "img2"
+    }
     response = client.put(f"/recipes_sections/{recipe_id}", json=updated_data)
     assert response.status_code == 202
 
@@ -39,4 +50,4 @@ def test_get_paginated_recipes():
     # Test getting a paginated list of recipes
     response = client.get("/recipes_sections?offset=0&limit=5")
     assert response.status_code == 200
-    assert isinstance(response.json(), list)
+    assert isinstance(response.json().get('data'), list)
