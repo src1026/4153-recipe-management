@@ -16,7 +16,7 @@ def test_create_recipe():
     # Test creating a recipe
     
     recipe_data = {
-        "recipe_id": recipe_id,
+        "recipe_id": unique_recipe_id,
         "recipe_name": "Pasta",
         "user_id": 1,
         "content": "Boil pasta, cook sauce, mix ingredients together.",
