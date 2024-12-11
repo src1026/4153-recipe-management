@@ -37,6 +37,7 @@ jobs:
     - name: Debug working directory
       run: |
         echo "Working Directory: $(pwd)"
+        echo "PYTHONPATH: $PYTHONPATH"
         ls -R
 
     # Linting
@@ -50,7 +51,8 @@ jobs:
       run: |
         pip install pytest
         pip install httpx
-        pytest PYTHONPATH=$(pwd)/app tests/
+        echo "Running pytest with PYTHONPATH: $(pwd)/app"
+        pytest tests/
 
     
   #deploy:
