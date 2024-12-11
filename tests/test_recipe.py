@@ -3,6 +3,8 @@ from app.main import app  # Import the FastAPI app
 
 client = TestClient(app)
 
+unique_recipe_id = int(time.time()) #unique test id
+
 def test_get_recipes_section():
     # Test retrieving a recipe section by ID
     recipe_id = "1"
@@ -11,8 +13,9 @@ def test_get_recipes_section():
 
 def test_create_recipe():
     # Test creating a recipe
+    
     recipe_data = {
-        "recipe_id": 123,
+        "recipe_id": recipe_id,
         "recipe_name": "Pasta",
         "user_id": 1,
         "content": "Boil pasta, cook sauce, mix ingredients together.",
@@ -30,7 +33,7 @@ def test_create_recipe():
 
 def test_update_recipe():
     # Test updating a recipe
-    recipe_id = "123"
+    recipe_id = unique_recipe_id
     updated_data = {
         "recipe_name": "Updated Pasta",
         "user_id": 1,
