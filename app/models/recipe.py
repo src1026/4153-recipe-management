@@ -47,10 +47,10 @@ class RecipeSection(BaseModel):
                 "create_time": "2024-09-27T09:54:51Z",
                 "pictures": "img1",
                 "links": [
-                    {"rel": "self", "href": "/recipes_sections/123", "method": "GET"},
-                    {"rel": "update", "href": "/recipes_sections/123", "method": "PUT"},
-                    {"rel": "delete", "href": "/recipes_sections/123", "method": "DELETE"},
-                    {"rel": "comments", "href": "/recipes_sections/123/comments", "method": "GET"}
+                    {"rel": "self", "href": "/recipe-section/123", "method": "GET"},
+                    {"rel": "update", "href": "/recipe-section/123", "method": "PUT"},
+                    {"rel": "delete", "href": "/recipe-section/123", "method": "DELETE"},
+                    {"rel": "comments", "href": "/recipe-section/123/comments", "method": "GET"}
                 ]
             }
         }

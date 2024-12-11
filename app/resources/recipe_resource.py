@@ -54,20 +54,25 @@ class RecipeResource(BaseResource):
         return [RecipeSection(**result) for result in results], total_count
 
     def create_recipe(self, recipe_data: dict):
-         d_service = self.data_service
-         recipe_data.pop('links', None)
-         new_recipe = d_service.create_data_object(
-             self.database, self.collection, recipe_data
-         )
-         if not new_recipe:
-             raise Exception("Failed to create new recipe")
-         return RecipeSection(**new_recipe)
+        print("Received recipe data:", recipe_data)
+        d_service = self.data_service
+        recipe_data.pop('links', None)
+        new_recipe = d_service.create_data_object(
+            self.database, self.collection, recipe_data
+        )
+
+        if not new_recipe:
+            raise Exception("Failed to create new recipe")
+        return RecipeSection(**new_recipe)
 
     def update_recipe(self, key: int, recipe_data: dict):
          d_service = self.data_service
+         recipe_data.pop('links', None)
          updated_recipe = d_service.update_data_object(
-             self.database, self.collection, key_field=self.key_field, key_value=key, update_data=recipe_data
+             self.database, self.collection, recipe_data
          )
+         if not updated_recipe:
+            raise Exception("Failed to create new recipe")
          return RecipeSection(**updated_recipe)
 
     def delete_recipe(self, key: int) -> Any:

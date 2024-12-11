@@ -77,6 +77,24 @@ class MySQLRDBDataService(DataDataService):
             cursor = connection.cursor()
             print("Cursor created successfully.")
 
+            # To see databse content for debugging purpose
+            print("Existing entries in recipe database:")
+            with connection.cursor() as cursor:
+                # Replace 'your_table' with the actual table name
+                cursor.execute(f"SELECT * FROM `{database_name}`.`{collection_name}`")
+                
+                # Step 3: Fetch and print the results
+                rows = cursor.fetchall()
+                
+                if rows:
+                    print("Existing records in the table:")
+                    for row in rows:
+                        print(row)  # Print each row as a dictionary
+                else:
+                    print("The table is empty.")
+            # QUESTION: cuisine_id limited options? e.g. when I set cuisine_id:4, it gives the error message MySQL Error: (1452, 'Cannot add or update a child row: a foreign key constraint fails (`recipe_management`.`Recipe`, CONSTRAINT `Recipe_ibfk_2` FOREIGN KEY (`cuisine_id`) REFERENCES `Cuisine` (`cuisine_id`))')
+            # Does this mean we need to manage the table containing cuisine_id as well (AKA not only updating recipe table?)
+
             # Remove recipe_id if it's None
             data = {k: v for k, v in data.items() if v is not None}
 
@@ -90,6 +108,8 @@ class MySQLRDBDataService(DataDataService):
 
             # Execute SQL
             with connection.cursor() as cursor:
+                print(list(data.values()))
+                print("---------------------------")
                 cursor.execute(sql_statement, list(data.values()))
                 connection.commit()
                 new_id = cursor.lastrowid  # Fetch the auto-incremented primary key
@@ -133,7 +153,7 @@ class MySQLRDBDataService(DataDataService):
             with connection.cursor() as cursor:
                 cursor.execute(sql_statement, params)
                 result = cursor.fetchone()
-                total_count = result["total"] if result else 0
+                total_count = result["total"] if result else 0 # Question: Where did the "total" column come from?
         except Exception as e:
             print(f"Error fetching total count: {e}")
         finally:
@@ -170,6 +190,58 @@ class MySQLRDBDataService(DataDataService):
                 connection.close()
                 print("connection closed")
         return results
+    
+    def update_data_object(self, database_name: str, collection_name: str, data: dict):
+        for k, v in data.items():
+            print(str(k) + "=" + str(v))
+        connection = self._get_connection()
+        if not connection:
+            print("No connection")
+            raise Exception("Failed to establish a database connection.")
+
+        if not data:
+            print("No data provided for insertion")
+            raise ValueError("Data dictionary is empty.")
+        
+        try:
+            print("Testing connection and cursor creation...")
+            cursor = connection.cursor()
+            print("Cursor created successfully.")
+            
+            key = data.get('recipe_id')
+            if not key:
+                print("Missing 'recipe_id' in data.")
+                raise ValueError("recipe_id is required for update.")
+            
+            # Prepare SQL
+            columns = ', '.join([f"`{col}` = %s" for col in data.keys()])  # Handle column names with placeholders
+            sql_statement = f"UPDATE `{database_name}`.`{collection_name}` SET {columns} WHERE `recipe_id` = %s"
+            
+            print("SQL Statement:", sql_statement)
+            print("Data Values:", list(data.values()))
+
+            # Execute the query with the parameters
+            cursor.execute(sql_statement, list(data.values()) + [key])
+
+            # Commit the changes
+            connection.commit()
+            print("Update successful.")
+        
+            # Check if data is None before passing it to another function
+            if data is None:
+                print("Data is None, returning None.")
+                return None
+            return data
+        except pymysql.MySQLError as e:
+            print(f"MySQL Error: {e}")
+            return None
+        except Exception as e:
+            print(f"General Error inserting data: {e}")
+            return None
+        finally:
+            if connection:
+                connection.close()
+                print("Database connection closed.")
 
     def delete_data_object(self, database_name: str, table_name: str, key_field: str, key_value: Any) -> bool:
         connection = self._get_connection()
