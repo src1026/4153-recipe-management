@@ -36,10 +36,10 @@ jobs:
         flake8 --config=.flake8 app/
 
     # Run tests
-    #- name: Run tests
-    #  run: |
-    #    pip install pytest
-    #    pytest tests/
+    - name: Run tests
+      run: |
+        pip install pytest
+        pytest tests/
 
     
   #deploy:
