@@ -64,7 +64,7 @@ async def get_recipe(
         },
     }
 
-
+# QUESTION: When POST, the new entry is created correctly in the database but Postman shows that the recipe_id as 0 for some reason? Shall we fix this?
 @router.post("/recipe-section", tags=["recipes"], response_model=RecipeSection, status_code=status.HTTP_201_CREATED)
 async def create_recipe(
         recipe_data: RecipeSection,
