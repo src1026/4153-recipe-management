@@ -48,10 +48,9 @@ jobs:
     # Run tests
     - name: Run tests
       run: |
-        export PYTHONPATH=$(pwd)/app
         pip install pytest
         pip install httpx
-        pytest tests/
+        pytest PYTHONPATH=$(pwd)/app tests/
 
     
   #deploy:
