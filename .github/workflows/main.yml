@@ -33,6 +33,12 @@ jobs:
     - name: Set PYTHONPATH
       run: echo "PYTHONPATH=$(pwd)/app" >> $GITHUB_ENV
 
+    # Debugging: Print working directory and contents
+    - name: Debug working directory
+      run: |
+        echo "Working Directory: $(pwd)"
+        ls -R
+
     # Linting
     - name: Lint with flake8
       run: |
