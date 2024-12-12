@@ -62,7 +62,7 @@ jobs:
     #deploy using learner lab
     - name: Deploy to Learner Lab EC2
       run: |
-          ssh -o StrictHostKeyChecking=no -i app/jigglypuff.pem jigglypuff@3.80.130.69 << EOF
+          ssh -o StrictHostKeyChecking=no -i app/jigglypuff.pem ec2-user@3.80.130.69 << EOF
             sudo apt update
             sudo apt install -y python3 python3-pip git
             cd /home/ubuntu/recipe-management || git clone https://github.com/src1026/4153-recipe-management.git /home/ubuntu/recipe-management
