@@ -15,11 +15,12 @@ from app.routers import recipes
 
 import watchtower
 import boto3
-
-
+"""
+boto3_client = boto3.client('logs', region_name='us-east-1')
 # Configure CloudWatch logging
 cloudwatch_handler = watchtower.CloudWatchLogHandler(
-    boto3_session=boto3.Session(region_name="us-east-1"),
+    # boto3_session=boto3.Session(region_name="us-east-1"),
+    boto3_client=boto3_client,
     log_group="recipe_management_logs",
     stream_name="application_logs"
 )
@@ -27,7 +28,7 @@ cloudwatch_handler = watchtower.CloudWatchLogHandler(
 # Add CloudWatch handler to the root logger
 logging.getLogger().addHandler(cloudwatch_handler)
 logging.info("CloudWatch Logging is configured.")
-
+"""
 # Configure global logging without hardcoding `correlation_id`
 logging.basicConfig(
     level=logging.INFO,
