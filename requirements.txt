@@ -15,3 +15,6 @@ uvicorn==0.30.6
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-instrumentation
+boto3
+watchtower
+
