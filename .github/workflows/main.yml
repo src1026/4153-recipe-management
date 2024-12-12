@@ -54,6 +54,11 @@ jobs:
         echo "Running pytest with PYTHONPATH: $(pwd)/app"
         pytest tests/
 
+    #set file permissions
+    - name: Set permissions for the private key
+      run: |
+        chmod 600 app/jigglypuff.pem
+
     #deploy using learner lab
     - name: Deploy to Learner Lab EC2
       run: |
