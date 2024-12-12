@@ -5,6 +5,8 @@ from app.services.service_factory import ServiceFactory
 from typing import List, Optional
 from opentelemetry import trace
 import logging, uuid
+import datetime
+
 router = APIRouter()
 app = FastAPI()
 
@@ -60,7 +62,7 @@ async def get_recipes(recipe_id: str):
 @router.get("/recipes_sections", tags=["recipes"], response_model=PaginatedRecipeResponse)
 async def get_recipe(
     skip: int = Query(0, alias="offset"),
-    limit: int = Query(10),
+    limit: int = Query(100),
     filter_by: Optional[str] = None,
     recipe_resource: RecipeResource = Depends(get_recipe_resource)
 ):
@@ -94,7 +96,13 @@ async def create_recipe(
         recipe_data: RecipeSection,
         recipe_resource: RecipeResource = Depends(get_recipe_resource)
 ):
-    new_recipe = recipe_resource.create_recipe(recipe_data.dict())
+    recipe_data_dict = recipe_data.dict()
+    recipe_data_dict.update({
+        "recipe_id": await recipe_resource.get_next_recipe_id(),  
+        "user_id": 5,
+        "create_time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    })
+    new_recipe = recipe_resource.create_recipe(recipe_data_dict)
     if not new_recipe:
         raise HTTPException(status_code=400, detail="Recipe creation failed")
     return new_recipe, {"Location": f"/recipes_sections/{new_recipe.recipe_id}"}
