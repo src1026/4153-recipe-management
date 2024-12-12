@@ -67,10 +67,16 @@ jobs:
             sudo yum install -y git python3 python3-pip
             pip3 install uvicorn
 
-            cd /home/ec2-user 
-            git clone https://github.com/src1026/4153-recipe-management.git 
+            cd /home/ec2-user
+            if [ ! -d "/home/ec2-user/4153-recipe-management" ]; then
+              git clone https://github.com/src1026/4153-recipe-management.git 
+            else
+              cd /home/ec2-user/4153-recipe-management
+              git pull origin main
+            fi 
             ls
-            cd /home/ec2-user/recipe-management
+            cd /home/ec2-user/4153-recipe-management
+            git pull origin main
             
             pip3 install -r requirements.txt
             pkill -f uvicorn || true
