@@ -15,6 +15,7 @@ class RecipeResource(BaseResource):
         self.database = "recipe_management"
         self.collection = "Recipe"
         self.key_field = "recipe_id"
+        self.current_recipe_id = int(datetime.now().strftime('%Y%m%d%H%M%S')) - 20240000000000
 
 
     def get_by_key(self, key: str) -> RecipeSection:
@@ -75,3 +76,7 @@ class RecipeResource(BaseResource):
          return d_service.delete_data_object(
              self.database, self.collection, key_field=self.key_field, key_value=key
          )
+
+    async def get_next_recipe_id(self):
+        self.current_recipe_id = int(datetime.now().strftime('%Y%m%d%H%M%S')) - 20240000000000
+        return self.current_recipe_id
