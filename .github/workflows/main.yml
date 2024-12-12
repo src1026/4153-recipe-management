@@ -73,7 +73,7 @@ jobs:
             
             pip3 install -r requirements.txt
             pkill -f uvicorn || true
-            nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 &> /dev/null &
+            timeout 5m nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 &> /dev/null &
           EOF
     
     #- name: Deploy to EC2 
