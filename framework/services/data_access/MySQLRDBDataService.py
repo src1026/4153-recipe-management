@@ -64,49 +64,29 @@ class MySQLRDBDataService(DataDataService):
 
     def create_data_object(self, database_name: str, collection_name: str, data: dict):
         connection = self._get_connection()
-        if not connection:
-            print("No connection")
-            raise Exception("Failed to establish a database connection.")
-
-        if not data:
-            print("No data provided for insertion")
-            raise ValueError("Data dictionary is empty.")
-
         try:
-            print("Testing connection and cursor creation...")
-            cursor = connection.cursor()
-            print("Cursor created successfully.")
+            if not connection:
+                raise Exception("Failed to establish a database connection.")
 
-            # Remove recipe_id if it's None
-            data = {k: v for k, v in data.items() if v is not None}
+            # Remove 'recipe_id' if present in the payload
+            data.pop('recipe_id', None)
 
-            # Prepare SQL
-            columns = ', '.join([f"`{col}`" for col in data.keys()])  # Handle column names
-            placeholders = ', '.join(['%s'] * len(data))  # Generate placeholders
+            columns = ', '.join(data.keys())
+            placeholders = ', '.join(['%s'] * len(data))
             sql_statement = f"INSERT INTO `{database_name}`.`{collection_name}` ({columns}) VALUES ({placeholders})"
 
-            print("SQL Statement:", sql_statement)
-            print("Data Values:", list(data.values()))
-
-            # Execute SQL
             with connection.cursor() as cursor:
                 cursor.execute(sql_statement, list(data.values()))
                 connection.commit()
-                new_id = cursor.lastrowid  # Fetch the auto-incremented primary key
+                new_id = cursor.lastrowid  # Retrieve the auto-generated ID
                 data['recipe_id'] = new_id
-                print("Inserted data:", data)
                 return data
-
         except pymysql.MySQLError as e:
             print(f"MySQL Error: {e}")
-            return None
-        except Exception as e:
-            print(f"General Error inserting data: {e}")
             return None
         finally:
             if connection:
                 connection.close()
-                print("Database connection closed.")
 
     def get_total_count(self, database_name: str, table_name: str, filters: Optional[dict] = None) -> int:
         """
