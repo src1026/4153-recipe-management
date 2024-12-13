@@ -55,7 +55,7 @@ jobs:
     #deploy using learner lab
     - name: Deploy to Learner Lab EC2
       run: |
-          ssh -o StrictHostKeyChecking=no -i app/jigglypuff.pem ec2-user@3.80.130.69 << EOF    
+          ssh -t -o StrictHostKeyChecking=no -i app/jigglypuff.pem ec2-user@3.80.130.69 << EOF    
             sudo yum update -y
             sudo yum install -y git python3 python3-pip
             pip3 install uvicorn
@@ -84,10 +84,11 @@ jobs:
     #    key: ${{ secrets.EC2_PRIVATE_KEY }}
     #    port: 22
     #    script: |
-    #      sudo apt update
-    #      sudo apt install -y python3 python3-pip
+    #      sudo yum update -y
+    #      sudo yum install -y git python3 python3-pip
+    #      pip3 install uvicorn
     #      pip3 install -r requirements.txt
     #      pkill -f uvicorn || true
-    #      nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+    #      timeout 5m nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 &
     
     
