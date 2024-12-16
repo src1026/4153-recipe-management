@@ -10,7 +10,10 @@ from services.gcs_service import upload_image
 import os 
 
 router = APIRouter()
-app = FastAPI()
+app = FastAPI(
+    title="Recipe Management API",
+    description="API for managing and retrieving recipes"
+)
 
 # Middleware to handle correlation ID and logging
 @app.middleware("http")
@@ -40,7 +43,31 @@ def generate_correlation_id() -> str:
 def get_recipe_resource() -> RecipeResource:
     return RecipeResource(config={})
 
-@router.get("/recipes_sections/{recipe_id}", tags=["recipes"], response_model=RecipeSection)
+@router.get("/recipes_sections/{recipe_id}", 
+            tags=["recipes"], 
+            response_model=RecipeSection, 
+            summary="get a specific recipe", 
+            description="retreive a recipe by it's unique ID based on key words",
+            responses={
+                200: {
+                    "description": "Recipe found successfully",
+                    "model": RecipeSection,  # Model used in the response
+                    "example": {
+                        "recipe_id": 123,
+                        "recipe_name": "Spaghetti Carbonara",
+                        "content": "A delicious Italian pasta dish",
+                        "rating": 4.5,
+                        "cuisine_id": 1,
+                        "ingredient_id": ["spaghetti", "eggs", "bacon"],
+                        "cooking_time": 20,
+                        "create_time": "2024-12-15T12:00:00"
+                    }
+                },
+                404: {
+                    "description": "Recipe not found"
+                }
+            })
+            
 async def get_recipes(recipe_id: str):
     res = ServiceFactory.get_service("RecipeResource")
     result = res.get_by_key(recipe_id)
@@ -65,7 +92,43 @@ async def get_recipes(recipe_id: str):
     # TODO: Add error handling (currently getting errors for NoneTypes )
     # TODO: Do lifecycle management for singleton resource
 
-@router.get("/recipes_sections", tags=["recipes"], response_model=PaginatedRecipeResponse)
+@router.get("/recipes_sections", 
+            tags=["recipes"], 
+            response_model=PaginatedRecipeResponse, 
+            summary="list recipes", 
+            description="retreive a paginated list of recipes with optional filtering",
+            responses={200: {
+                "description": "A list of recipes",
+                "model": PaginatedRecipeResponse,
+                "example": {
+                    "data": [
+                        {
+                            "recipe_id": 123,
+                            "recipe_name": "Pasta",
+                            "content": "Boil pasta, cook sauce, mix ingredients together.",
+                            "rating": 4.5,
+                            "cuisine_id": 2,
+                            "ingredient_id": "1, 2, 3",
+                            "comment": "101, 102",
+                            "cooking_time": 30,
+                            "create_time": "2024-09-27T09:54:51Z",
+                            "pictures": "img1",
+                            "links": [
+                                {"rel": "self", "href": "/recipes_sections/123", "method": "GET"},
+                                {"rel": "update", "href": "/recipes_sections/123", "method": "PUT"},
+                                {"rel": "delete", "href": "/recipes_sections/123", "method": "DELETE"},
+                                {"rel": "comments", "href": "/recipes_sections/123/comments", "method": "GET"}
+                            ]
+                        }
+                    ],
+                    "pagination": {
+                        "offset": 0,
+                        "limit": 100,
+                        "total_count": 1
+                    }
+                }
+            }})
+
 async def get_recipe(
     skip: int = Query(0, alias="offset"),
     limit: int = Query(100),
@@ -97,11 +160,66 @@ async def get_recipe(
     }
 
 
-@router.post("/recipes_sections", tags=["recipes"], response_model=RecipeSection, status_code=status.HTTP_201_CREATED)
+@router.post("/recipes_sections", 
+            tags=["recipes"], 
+            response_model=RecipeSection, 
+            status_code=status.HTTP_201_CREATED, 
+            summary="create new recipe", 
+            description="create a new recipe with unique ID using required information",
+            responses={201: {"model": RecipeSection, "example": {
+                "recipe_id": 123,
+                "recipe_name": "Pasta",
+                "content": "Boil pasta, cook sauce, mix ingredients together.",
+                "rating": 4.5,
+                "cuisine_id": 2,
+                "ingredient_id": "1, 2, 3",
+                "comment": "101, 102",
+                "cooking_time": 30,
+                "create_time": "2024-09-27T09:54:51Z",
+            }}}
+)
 async def create_recipe(
         recipe_data: RecipeSection,
         recipe_resource: RecipeResource = Depends(get_recipe_resource)
 ):
+   
+    """
+    Create a new recipe.
+
+    - **recipe_data**: The body of the request should contain the recipe information (e.g., name, ingredients, etc.).
+
+    Example request body:
+    ```json
+    {
+        "recipe_name": "Spaghetti Carbonara",
+        "content": "A delicious Italian pasta dish",
+        "rating": 4.5,
+        "cuisine_id": 2,
+        "ingredient_id": "1, 2, 3",
+        "comment": "101, 102",
+        "cooking_time": 30,
+    }
+    ```
+
+    Example response:
+    ```json
+    {
+        "recipe_id": 123,
+        "recipe_name": "Spaghetti Carbonara",
+        "content": "A delicious Italian pasta dish",
+        "rating": 4.5,
+        "cuisine_id": 1,
+        "ingredient_id": ["spaghetti", "eggs", "bacon"],
+        "cooking_time": 20,
+        "create_time": "2024-12-15T12:00:00"
+    }
+    ```
+
+    Responses:
+    - **201 Created**: The recipe is created successfully.
+    - **400 Bad Request**: Invalid input data.
+    """
+
     recipe_data_dict = recipe_data.dict()
     recipe_data_dict.update({
         "recipe_id": await recipe_resource.get_next_recipe_id(),  
@@ -113,7 +231,7 @@ async def create_recipe(
         raise HTTPException(status_code=400, detail="Recipe creation failed")
     return new_recipe, {"Location": f"/recipes_sections/{new_recipe.recipe_id}"}
 
-@router.put("/recipes_sections/{recipe_id}", tags=["recipes"], status_code=status.HTTP_202_ACCEPTED)
+@router.put("/recipes_sections/{recipe_id}", tags=["recipes"], status_code=status.HTTP_202_ACCEPTED, summary="update existing recipe", description="update information in existing recipe")
 async def update_recipe(
     recipe_id: str,
     recipe_data: RecipeSection,
@@ -128,7 +246,11 @@ async def update_recipe(
         "task_status_url": status_url
     }
 
-@router.delete("/recipes_sections/{recipe_id}", tags=["recipes"])
+@router.delete("/recipes_sections/{recipe_id}", 
+               tags=["recipes"], 
+               summary="delete existing recipe", 
+               description="find and delete a recipe by it's unique ID",
+               responses={200: {"description": "Recipe deleted successfully!"}})
 async def delete_recipe(recipe_id: str, recipe_resource: RecipeResource = Depends(get_recipe_resource)):
     """
     Delete a recipe by ID.

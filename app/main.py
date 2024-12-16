@@ -54,7 +54,10 @@ span_exporter = ConsoleSpanExporter()
 span_processor = SimpleSpanProcessor(span_exporter)
 tracer_provider.add_span_processor(span_processor)
 
-app = FastAPI()
+app = FastAPI(
+    title="Recipe Management API",
+    description="API for managing and retrieving recipes"
+)
 
 # Enable CORS
 app.add_middleware(
