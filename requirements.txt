@@ -17,4 +17,6 @@ opentelemetry-sdk
 opentelemetry-instrumentation
 boto3
 watchtower
+google-cloud-storage
+
 
