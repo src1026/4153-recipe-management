@@ -6,7 +6,7 @@ from typing import List, Optional
 from opentelemetry import trace
 import logging, uuid
 import datetime
-from services.gcs_service import upload_image
+from app.services.gcs_service import upload_image
 import os 
 
 router = APIRouter()
