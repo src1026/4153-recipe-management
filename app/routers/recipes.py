@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, HTTPException, status, Request, FastAPI
+from fastapi import APIRouter, Depends, Query, HTTPException, status, Request, FastAPI, UploadFile
 from app.models.recipe import RecipeSection, PaginatedRecipeResponse
 from app.resources.recipe_resource import RecipeResource
 from app.services.service_factory import ServiceFactory
@@ -6,6 +6,8 @@ from typing import List, Optional
 from opentelemetry import trace
 import logging, uuid
 import datetime
+from services.gcs_service import upload_image
+import os 
 
 router = APIRouter()
 app = FastAPI(
@@ -74,6 +76,10 @@ async def get_recipes(recipe_id: str):
 
     if isinstance(result, dict):
         result = RecipeSection(**result)
+
+    if result.pictures:
+        bucket_url = f"https://storage.googleapis.com/jigglypuff-images/"
+        result.pictures = bucket_url + result.pictures
 
     # HATEOAS
     result.links = [
@@ -259,3 +265,19 @@ async def delete_recipe(recipe_id: str, recipe_resource: RecipeResource = Depend
             {"rel": "list", "href": "/recipes_sections", "method": "GET"},
         ],
     }
+
+@router.post("/upload")
+async def upload_file(image: UploadFile):
+    try:
+        temp_path = os.path.join("/tmp", image.filename)
+        with open(temp_path, "wb") as temp_file:
+            content = await image.read()
+            temp_file.write(content)
+
+        public_url = upload_image(temp_path)
+
+        os.remove(temp_path)
+
+        return {"message": "Image uploaded successfully", "url": public_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload image: {e}")
